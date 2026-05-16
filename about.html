@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — Bisma Afzal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Epilogue:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--white:#FAFAF7;--ink:#0D0D0B;--muted:#9A9A94;--green:#2B5C3A;--rule:#E5E4E0;}
+body{background:var(--white);color:var(--ink);font-family:'Epilogue',sans-serif;font-weight:300;overflow-x:hidden;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 40px;height:56px;border-bottom:1px solid var(--rule);background:rgba(250,250,247,0.94);backdrop-filter:blur(8px);}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:.92rem;font-style:italic;color:var(--ink);text-decoration:none;}
+.nav-links{display:flex;gap:32px;list-style:none;}
+.nav-links a{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s;}
+.nav-links a:hover,.nav-links a.on{color:var(--ink);}
+.nav-status{font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--green);}
+
+main{padding:56px 40px 80px;max-width:1100px;margin:0 auto;}
+
+.page-header{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  padding:40px 0 24px;border-bottom:1px solid var(--rule);margin-bottom:64px;
+}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,5rem);font-weight:300;line-height:.92;letter-spacing:-.02em;}
+.page-title em{font-style:italic;}
+.page-meta{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:right;line-height:1.7;}
+
+/* — BIO — */
+.bio-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-bottom:72px;}
+.bio-text{font-family:'Cormorant Garamond',serif;font-size:1.2rem;line-height:1.75;color:var(--ink);font-weight:300;}
+.bio-text p+p{margin-top:20px;}
+.skills-col{}
+.skill-section+.skill-section{margin-top:32px;}
+.skill-cat{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--rule);}
+.skill-list{list-style:none;}
+.skill-list li{font-size:.78rem;line-height:1.9;color:var(--ink);padding:3px 0;border-bottom:1px solid transparent;transition:border-color .2s;}
+.skill-list li:hover{border-color:var(--rule);}
+
+/* — SECTION RULE — */
+.sec{margin-bottom:64px;}
+.sec-header{display:flex;justify-content:space-between;align-items:baseline;padding:24px 0 20px;border-bottom:1px solid var(--rule);margin-bottom:0;}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:clamp(1.4rem,3vw,2rem);font-weight:300;font-style:italic;}
+.sec-count{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+
+/* — RESEARCH TIMELINE — */
+.entry{display:grid;grid-template-columns:220px 1fr;border-bottom:1px solid var(--rule);padding:32px 0;}
+.entry:last-child{border-bottom:none;}
+.entry-time{}
+.entry-year{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--green);line-height:1;margin-bottom:6px;}
+.entry-range{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);line-height:1.6;}
+.entry-body{}
+.entry-role{font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:var(--ink);margin-bottom:3px;}
+.entry-org{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
+.entry-list{list-style:none;}
+.entry-list li{font-size:.8rem;line-height:1.82;color:#555;padding:2px 0 2px 16px;position:relative;}
+.entry-list li::before{content:'–';position:absolute;left:0;color:var(--green);}
+
+/* — PUBS — */
+.pub{display:grid;grid-template-columns:80px 1fr;border-bottom:1px solid var(--rule);padding:24px 0;align-items:start;}
+.pub-type{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--green);padding-top:2px;}
+.pub-title{font-family:'Cormorant Garamond',serif;font-size:1rem;line-height:1.5;color:var(--ink);margin-bottom:6px;}
+.pub-venue{font-size:.73rem;color:var(--muted);line-height:1.5;}
+.pub-venue a{color:var(--green);text-decoration:none;}
+
+/* — AWARDS — */
+.award{display:flex;justify-content:space-between;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--rule);gap:24px;}
+.award-name{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--ink);}
+.award-date{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);flex-shrink:0;}
+
+.fi{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s ease;}
+.fi.in{opacity:1;transform:none;}
+
+footer{border-top:1px solid var(--rule);padding:18px 40px;display:flex;justify-content:space-between;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+
+@media(max-width:768px){
+  nav{padding:0 20px;}.nav-status{display:none;}.nav-links{gap:20px;}
+  main{padding:56px 20px 60px;}
+  .bio-grid{grid-template-columns:1fr;}
+  .entry{grid-template-columns:1fr;gap:10px;}
+  .pub{grid-template-columns:60px 1fr;gap:12px;}
+  .award{flex-direction:column;gap:4px;}
+  footer{flex-direction:column;gap:4px;}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Bisma Afzal</a>
+  <ul class="nav-links">
+    <li><a href="about.html" class="on">About</a></li>
+    <li><a href="projects.html">Projects</a></li>
+    <li><a href="brain.html">Brain</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <div class="nav-status">Pre-MD/PhD · UIC</div>
+</nav>
+
+<main>
+  <div class="page-header fi">
+    <h1 class="page-title">About &<br><em>Research</em></h1>
+    <div class="page-meta">Coll. 2024/2026<br>N°001 — About</div>
+  </div>
+
+  <div class="bio-grid fi">
+    <div class="bio-text">
+      <p>I'm a neuroscience researcher who codes. At the Gao Research Group at UIC, I develop Expansion Microscopy protocols for nanoscale imaging of mouse brain tissue and build automated analysis pipelines in Python to quantify RNA puncta and characterize neuroinflammatory gene expression in Alzheimer's disease models at single-cell resolution.</p>
+      <p>At UChicago Medicine, I conduct structured interviews on end-of-life care decision-making and apply R and statistical modeling to identify healthcare utilization disparities in AAPI Medicare beneficiaries — research presented at national conferences.</p>
+      <p>My work lives at the intersection of wet lab science, computational image analysis, and patient-facing clinical research. Graduating May 2026. Seeking Pre-MD/PhD opportunities.</p>
+    </div>
+    <div class="skills-col">
+      <div class="skill-section">
+        <div class="skill-cat">Computation</div>
+        <ul class="skill-list">
+          <li>Python — image analysis, pipelines</li>
+          <li>R — statistical modeling, visualization</li>
+          <li>MATLAB — signal processing</li>
+          <li>ImageJ / CellProfiler</li>
+          <li>REDCap · EPIC (EHR)</li>
+        </ul>
+      </div>
+      <div class="skill-section">
+        <div class="skill-cat">Laboratory</div>
+        <ul class="skill-list">
+          <li>Expansion Microscopy (ExM)</li>
+          <li>HCR-FISH · ICC/IF · IHC</li>
+          <li>Cell culture · Sterile technique</li>
+          <li>RNA purification · PCR</li>
+          <li>Tissue sectioning · Sample processing</li>
+        </ul>
+      </div>
+      <div class="skill-section">
+        <div class="skill-cat">Clinical Research</div>
+        <ul class="skill-list">
+          <li>IRB protocols · HIPAA compliance</li>
+          <li>Qualitative coding · Structured interviews</li>
+          <li>Human subjects research</li>
+          <li>Literature review · Data analysis</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESEARCH -->
+  <div class="sec fi">
+    <div class="sec-header">
+      <div class="sec-title">Research Experience</div>
+      <div class="sec-count">4 positions</div>
+    </div>
+    <div class="entry">
+      <div class="entry-time"><div class="entry-year">2024</div><div class="entry-range">Sep 2024 — Present</div></div>
+      <div class="entry-body">
+        <div class="entry-role">Research Assistant — Gao Research Group</div>
+        <div class="entry-org">University of Illinois Chicago</div>
+        <ul class="entry-list">
+          <li>Develop and optimize Expansion Microscopy (ExM) protocols for nanoscale imaging of mouse brain tissue, investigating neurons and glia at single-cell resolution.</li>
+          <li>Execute ICC/IF and HCR-FISH for simultaneous RNA and protein localization, characterizing neuroinflammatory gene expression in Alzheimer's disease models.</li>
+          <li>Built image analysis and data analysis pipelines in ImageJ and CellProfiler to automate segmentation and RNA puncta quantification.</li>
+          <li>Maintain detailed experimental records; assist with lab organization, reagent preparation, and training of new lab members.</li>
+          <li>Co-authored a preprint on super-resolved 3D spatial transcriptomics (bioRxiv, 2026).</li>
+        </ul>
+      </div>
+    </div>
+    <div class="entry">
+      <div class="entry-time"><div class="entry-year">2024</div><div class="entry-range">Jun 2024 — Present</div></div>
+      <div class="entry-body">
+        <div class="entry-role">Senior Clinical Research Assistant — The Hospitalist Project</div>
+        <div class="entry-org">University of Chicago Medicine</div>
+        <ul class="entry-list">
+          <li>Ensure compliance with IRB protocols and HIPAA through accurate documentation and communication with diverse patient populations.</li>
+          <li>Promoted to Senior Clinical Research Assistant within 1 year based on demonstrated initiative and careful documentation.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="entry">
+      <div class="entry-time"><div class="entry-year">2024</div><div class="entry-range">Jun 2024 — Present</div></div>
+      <div class="entry-body">
+        <div class="entry-role">Fellow — CHARISMA Fellowship</div>
+        <div class="entry-org">University of Chicago Medicine</div>
+        <ul class="entry-list">
+          <li>Conducted semi-structured interviews with proxies of deceased patients; coded qualitative data across 5 thematic domains of end-of-life decision-making and advance care planning.</li>
+          <li>Interdisciplinary lectures on molecular mechanisms of Alzheimer's disease and dementia.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="entry">
+      <div class="entry-time"><div class="entry-year">2025</div><div class="entry-range">Sep 2025 — Mar 2026</div></div>
+      <div class="entry-body">
+        <div class="entry-role">Research Assistant / Project Lead — Dept. of Linguistics</div>
+        <div class="entry-org">University of Illinois Chicago</div>
+        <ul class="entry-list">
+          <li>Led independent statistical analysis of population-level datasets to identify disparities in preventive care utilization among AAPI Medicare beneficiaries.</li>
+          <li>Presented findings at ASIANetwork Annual Conference, Naperville, IL (2026).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUBS -->
+  <div class="sec fi">
+    <div class="sec-header">
+      <div class="sec-title">Publications & Presentations</div>
+      <div class="sec-count">6 items</div>
+    </div>
+    <div class="pub">
+      <div class="pub-type">Preprint</div>
+      <div><div class="pub-title">Super-resolved, three-dimensional spatial transcriptomics reveals cell-type and brain-region-specific modulation of key epitranscriptomic switches following adolescent alcohol exposure</div><div class="pub-venue">Tandukar J., Islam A., Malovic E., <strong>Afzal B.</strong>, et al. — <em>bioRxiv</em> (2026) — <a href="https://doi.org/10.64898/2026.01.22.698893" target="_blank">doi:10.64898/2026.01.22.698893</a></div></div>
+    </div>
+    <div class="pub">
+      <div class="pub-type">Poster</div>
+      <div><div class="pub-title">Investigating Neuroinflammatory Gene Expression in Alzheimer's Disease</div><div class="pub-venue"><strong>Afzal B.</strong>, Tandukar J., Islam A., et al. — UIC Undergraduate Research Forum, Chicago, IL (2026)</div></div>
+    </div>
+    <div class="pub">
+      <div class="pub-type">Poster</div>
+      <div><div class="pub-title">Disparities in Cancer Screening Utilization Among Asian American and Pacific Islander Medicare Beneficiaries</div><div class="pub-venue"><strong>Afzal B.</strong>, Nyarko J., Mishra R. — ASIANetwork Annual Conference, Naperville, IL (2026)</div></div>
+    </div>
+    <div class="pub">
+      <div class="pub-type">Poster</div>
+      <div><div class="pub-title">Advance Care Planning and End-of-Life Care Experiences Among High Healthcare Utilizers as Reported by Proxies</div><div class="pub-venue"><strong>Afzal B.</strong>, Wang J., Kim C., Marin O., Tate A. — CTMP/CHARISMA Symposium, UChicago (2026)</div></div>
+    </div>
+    <div class="pub">
+      <div class="pub-type">Oral</div>
+      <div><div class="pub-title">Unraveling Lysosomal Dysfunction Through Gene Expression Studies in Alzheimer's Disease</div><div class="pub-venue"><strong>Afzal B.</strong> — Summer Undergraduate Research Symposium, UIC (2025)</div></div>
+    </div>
+    <div class="pub">
+      <div class="pub-type">Poster</div>
+      <div><div class="pub-title">The Role of the Comprehensive Care Program Trial in End-of-Life Care Experiences and Advance Care Planning</div><div class="pub-venue">Marin O., <strong>Afzal B.</strong>, Kim C., Tate A. — AcademyHealth Annual Research Meeting, Minneapolis (2025)</div></div>
+    </div>
+  </div>
+
+  <!-- AWARDS -->
+  <div class="sec fi">
+    <div class="sec-header">
+      <div class="sec-title">Honors & Awards</div>
+      <div class="sec-count">6 awards</div>
+    </div>
+    <div class="award"><span class="award-name">College of Liberal Arts & Sciences Undergraduate Research Initiative (LASURI)</span><span class="award-date">Oct 2025</span></div>
+    <div class="award"><span class="award-name">Chancellor's Undergraduate Research Award (CURA)</span><span class="award-date">May 2025</span></div>
+    <div class="award"><span class="award-name">Honors College Undergraduate Research Grant</span><span class="award-date">Mar 2025</span></div>
+    <div class="award"><span class="award-name">Nu Rho Psi — National Honor Society in Neuroscience</span><span class="award-date">Dec 2024</span></div>
+    <div class="award"><span class="award-name">APIA / Coca-Cola Foundation First Generation AANAPISI Scholarship</span><span class="award-date">May 2024</span></div>
+    <div class="award"><span class="award-name">UIC Navigator Scholarship</span><span class="award-date">Jan 2024</span></div>
+  </div>
+</main>
+
+<footer>
+  <span>Bisma Afzal © 2026</span>
+  <span>N°001 — About</span>
+  <span>bismasafzal@gmail.com</span>
+</footer>
+
+<script>
+const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in');});},{threshold:.06});
+document.querySelectorAll('.fi').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

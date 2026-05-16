@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brain Explorer — Bisma Afzal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Epilogue:wght@200;300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:48px;display:flex;justify-content:space-between;align-items:center;padding:0 36px;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.06);}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:rgba(250,250,247,.85);text-decoration:none;}
+.nav-links{display:flex;gap:28px;list-style:none;}
+.nav-links a{font-family:'Epilogue',sans-serif;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.35);text-decoration:none;transition:color .2s;}
+.nav-links a:hover,.nav-links a.on{color:rgba(255,255,255,.8);}
+
+#canvas{position:fixed;inset:0;z-index:1;}
+
+/* — INFO PANEL — */
+.panel{
+  position:fixed;right:0;top:0;bottom:0;z-index:100;
+  width:300px;background:rgba(5,5,5,.96);backdrop-filter:blur(20px);
+  border-left:1px solid rgba(43,92,58,.25);
+  padding:72px 32px 36px;
+  display:flex;flex-direction:column;
+  transform:translateX(100%);
+  transition:transform .5s cubic-bezier(.23,1,.32,1);
+}
+.panel.open{transform:translateX(0);}
+.panel-close{
+  position:absolute;top:16px;right:16px;
+  width:28px;height:28px;border:1px solid rgba(255,255,255,.12);
+  background:none;color:rgba(255,255,255,.4);
+  font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.panel-close:hover{border-color:rgba(43,92,58,.8);color:#4E9A52;}
+.p-tag{font-family:'Epilogue',sans-serif;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:#4E9A52;margin-bottom:10px;}
+.p-name{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;color:#FAFAF7;line-height:1.1;margin-bottom:6px;}
+.p-sub{font-family:'Epilogue',sans-serif;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:20px;}
+.p-rule{height:1px;background:rgba(43,92,58,.25);margin-bottom:20px;}
+.p-text{font-family:'Cormorant Garamond',serif;font-size:.95rem;line-height:1.85;color:rgba(250,250,247,.65);flex:1;}
+.p-conn{margin-top:20px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.88rem;line-height:1.75;color:#4E9A52;display:none;padding-top:16px;border-top:1px solid rgba(43,92,58,.2);}
+
+/* — HINT — */
+.hint{
+  position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:50;
+  font-family:'Epilogue',sans-serif;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(255,255,255,.25);pointer-events:none;
+  animation:hpulse 2.5s ease-in-out infinite;
+}
+@keyframes hpulse{0%,100%{opacity:.25}50%{opacity:.55}}
+
+/* — REGION LABELS — */
+#labels{position:fixed;inset:0;pointer-events:none;z-index:20;}
+.rlabel{
+  position:absolute;transform:translate(-50%,-50%);
+  font-family:'Epilogue',sans-serif;font-size:.55rem;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:rgba(78,154,82,.55);white-space:nowrap;
+  transition:color .25s,opacity .25s;
+  pointer-events:none;
+}
+.rlabel.lit{color:#7BCF80;}
+
+@media(max-width:640px){
+  nav{padding:0 20px;}.nav-links{display:none;}
+  .panel{width:100%;height:55vh;top:auto;transform:translateY(100%);border-left:none;border-top:1px solid rgba(43,92,58,.25);}
+  .panel.open{transform:translateY(0);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">Bisma Afzal</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="projects.html">Projects</a></li>
+    <li><a href="brain.html" class="on">Brain</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+</nav>
+
+<canvas id="canvas"></canvas>
+<div id="labels"></div>
+
+<div class="panel" id="panel">
+  <button class="panel-close" onclick="closePanel()">✕</button>
+  <div class="p-tag" id="ptag">Select a Region</div>
+  <div class="p-name" id="pname">Brain Explorer</div>
+  <div class="p-sub" id="psub">Drag to rotate · Click regions</div>
+  <div class="p-rule"></div>
+  <p class="p-text" id="ptext">Click any glowing region of the brain to explore its anatomy, function, and connection to Alzheimer's disease research.</p>
+  <p class="p-conn" id="pconn"></p>
+</div>
+
+<div class="hint">Drag to rotate &nbsp;·&nbsp; Click regions to explore</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   BRAIN DATA
+══════════════════════════════════════════════ */
+const REGIONS=[
+  {id:'frontal',name:'Frontal Lobe',sub:'Executive Function & Motor Control',color:0x52B85C,
+   pos:[-0.5,0.6,1.95],r:.42,
+   text:'The frontal lobe governs executive functions: decision-making, working memory, impulse control, planning, and voluntary movement. The prefrontal cortex shapes personality and complex reasoning.',
+   conn:'Neuroinflammatory gene expression in the frontal cortex is a key focus of my research at the Gao Lab — characterized using HCR-FISH and expansion microscopy in Alzheimer\'s disease mouse models.'},
+  {id:'parietal',name:'Parietal Lobe',sub:'Sensory Integration & Spatial Awareness',color:0x52A8A8,
+   pos:[0.0,1.6,0.55],r:.38,
+   text:'The parietal lobe integrates sensory input from the body — touch, temperature, proprioception — via the somatosensory cortex, and directs visuospatial attention.',
+   conn:'Parietal cortex thinning is a documented structural biomarker in Alzheimer\'s disease, associated with visuospatial deficits. My 3D spatial transcriptomics work profiles this region at the cellular level.'},
+  {id:'temporal',name:'Temporal Lobe',sub:'Memory, Language & Auditory Processing',color:0x5280B8,
+   pos:[-1.3,-0.1,1.2],r:.40,
+   text:'The temporal lobe processes auditory information, houses Wernicke\'s language area, and contains the hippocampus and amygdala — critical for long-term memory formation and emotional processing.',
+   conn:'Temporal lobe atrophy is the earliest neuroanatomical hallmark of Alzheimer\'s disease. I investigate single-cell neuroinflammatory gene expression here and in the adjacent entorhinal cortex.'},
+  {id:'occipital',name:'Occipital Lobe',sub:'Visual Processing',color:0xB8B852,
+   pos:[0.0,0.1,-2.1],r:.38,
+   text:'The occipital lobe contains the primary visual cortex (V1) and higher-order visual association areas. It processes color, motion, depth, and object recognition from signals arriving via the optic tract.',
+   conn:'Visual hallucinations in Lewy body dementia arise from occipital disruption. My bioRxiv 2026 preprint profiles brain-region-specific epitranscriptomic changes that include the occipital cortex.'},
+  {id:'hippocampus',name:'Hippocampus',sub:'Memory Consolidation & Spatial Navigation',color:0xA852B8,
+   pos:[-0.55,-0.4,0.9],r:.3,
+   text:'The hippocampus, embedded in the medial temporal lobe, converts short-term memories into long-term storage and enables spatial navigation via place cells. It is among the first structures to degenerate in Alzheimer\'s disease.',
+   conn:'Most directly relevant to my Alzheimer\'s research — I investigate lysosomal dysfunction and neuroinflammatory gene expression in the hippocampus at single-cell resolution. Topic of my oral presentation at UIC SURS 2025.'},
+  {id:'cerebellum',name:'Cerebellum',sub:'Motor Coordination & Balance',color:0x8CA852,
+   pos:[-0.35,-1.2,-1.55],r:.4,
+   text:'The cerebellum contains more than half of all brain neurons. It fine-tunes voluntary movement, balance, and posture, and is increasingly implicated in cognitive and emotional processing.',
+   conn:'Profiled in my 3D spatial transcriptomics preprint (bioRxiv 2026): cell-type-specific epitranscriptomic changes across brain regions including cerebellum following adolescent alcohol exposure.'},
+  {id:'brainstem',name:'Brainstem',sub:'Vital Functions & Neural Relay',color:0x8C9AA8,
+   pos:[0.1,-2.25,-0.3],r:.28,
+   text:'The brainstem (midbrain, pons, medulla oblongata) regulates breathing, heart rate, and blood pressure. It relays signals between brain and spinal cord and contains the nuclei for most cranial nerves.',
+   conn:'The locus coeruleus — a small brainstem nucleus — is one of the earliest sites of tau pathology in Alzheimer\'s disease, preceding cognitive symptoms by decades. A key frontier in AD neuroinflammation research.'}
+];
+
+/* ══════════════════════════════════════════════
+   SCENE SETUP
+══════════════════════════════════════════════ */
+const W=window.innerWidth,H=window.innerHeight;
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x000000);
+scene.fog=new THREE.FogExp2(0x000000,.032);
+
+const camera=new THREE.PerspectiveCamera(42,W/H,.1,100);
+camera.position.set(0,.2,7.5);
+
+const renderer=new THREE.WebGLRenderer({canvas:document.getElementById('canvas'),antialias:true});
+renderer.setSize(W,H);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.physicallyCorrectLights=true;
+
+/* ══════════════════════════════════════════════
+   NOISE (value noise + fbm)
+══════════════════════════════════════════════ */
+function h(x,y,z){
+  let n=Math.sin(x*127.1+y*311.7+z*74.7)*43758.5453123;
+  return n-Math.floor(n);
+}
+function sm(t){return t*t*(3-2*t);}
+function vn(x,y,z){
+  const ix=Math.floor(x),iy=Math.floor(y),iz=Math.floor(z);
+  const fx=x-ix,fy=y-iy,fz=z-iz;
+  const ux=sm(fx),uy=sm(fy),uz=sm(fz);
+  return (
+    (1-uz)*((1-uy)*((1-ux)*h(ix,iy,iz)+ux*h(ix+1,iy,iz))+uy*((1-ux)*h(ix,iy+1,iz)+ux*h(ix+1,iy+1,iz)))+
+    uz*((1-uy)*((1-ux)*h(ix,iy,iz+1)+ux*h(ix+1,iy,iz+1))+uy*((1-ux)*h(ix,iy+1,iz+1)+ux*h(ix+1,iy+1,iz+1)))
+  );
+}
+function fbm(x,y,z,oct){
+  let v=0,a=.5,f=1;
+  for(let i=0;i<oct;i++){v+=vn(x*f,y*f,z*f)*a;a*=.5;f*=2.07;}
+  return v;
+}
+
+/* ══════════════════════════════════════════════
+   BRAIN GEOMETRY (high-res JS displacement)
+   Goal: convincing gyri and sulci
+══════════════════════════════════════════════ */
+function buildBrain(){
+  // 220x220 gives ~48k vertices — good detail, fast enough
+  const geo=new THREE.SphereGeometry(2.05,220,220);
+  const pos=geo.attributes.position;
+  const N=pos.count;
+
+  for(let i=0;i<N;i++){
+    const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);
+    const L=Math.sqrt(x*x+y*y+z*z);
+    // Normalize to sphere surface
+    let nx=x/L,ny=y/L,nz=z/L;
+
+    // === OVOID BRAIN SHAPE ===
+    // Real brain: wider front-to-back (z), slightly narrower top-bottom (y)
+    const ox=nx*1.04,oy=ny*0.92,oz=nz*1.14;
+    const oL=Math.sqrt(ox*ox+oy*oy+oz*oz);
+    nx=ox/oL;ny=oy/oL;nz=oz/oL;
+
+    // === LARGE-SCALE GYRI (coarse folds) ===
+    const f1=fbm(nx*2.2+10.5,ny*2.2,nz*2.2,6); // main undulation
+    const f2=fbm(nx*4.8+5.1,ny*4.8+3.3,nz*4.8,5); // medium folds
+
+    // === FINE SURFACE DETAIL ===
+    const f3=fbm(nx*9+22,ny*9+11,nz*9,3)*0.038;
+
+    // === SULCI (narrow grooves between gyri) ===
+    // The trick: grooves appear where sin(n) ≈ 0 — i.e., at zero crossings
+    // Power > 1 makes them narrower and sharper
+    const phase=f1*Math.PI*5.5+f2*1.8;
+    const gVal=Math.abs(Math.sin(phase)); // 0 at groove centres, 1 at ridge tops
+    // Groove depth: deepest at gVal≈0
+    const sulci=Math.pow(Math.max(0,1-gVal),5)*0.52;
+
+    // === INTERHEMISPHERIC FISSURE (top-centre, front-to-back) ===
+    // The brain has a deep central groove along the midline at the top
+    const fissXDist=Math.abs(nx); // 0 at midline
+    const fissYFactor=Math.max(0,ny*1.5); // only on upper hemisphere
+    const fissure=Math.max(0,(1-fissXDist*10)*fissYFactor)*0.28;
+
+    // === SYLVIAN FISSURE (lateral, rough horizontal groove) ===
+    // Runs roughly horizontally on the side of the brain
+    const sylvY=ny+0.1; // centred slightly above equator
+    const sylvX=Math.abs(Math.abs(nx)-0.85); // near the lateral edge
+    const sylvian=Math.max(0,1-sylvX*18)*Math.max(0,1-Math.abs(sylvY)*8)*0.22;
+
+    // === FLATTEN BASE for brainstem ===
+    const base=Math.max(0,-ny-0.18)*0.42;
+
+    // Final displacement
+    const disp=f1*0.28+f2*0.11+f3-sulci-fissure-sylvian-base;
+    const r=2.05+disp;
+
+    // Apply ovoid scaling
+    pos.setXYZ(i,nx*r*1.04,ny*r*0.92,nz*r*1.14);
+  }
+  geo.computeVertexNormals();
+  return geo;
+}
+
+/* Show loading hint */
+const hint=document.querySelector('.hint');
+hint.textContent='Building brain…';
+setTimeout(()=>{
+  const brainGeo=buildBrain();
+  hint.textContent='Drag to rotate · Click regions to explore';
+  initScene(brainGeo);
+},50);
+
+function initScene(brainGeo){
+  /* ── BRAIN MESH ── */
+  const brainMat=new THREE.MeshStandardMaterial({
+    color:0xD0CCBE, // warm off-white, like real brain
+    emissive:0x0A1208,
+    roughness:.82,
+    metalness:.02,
+  });
+  const brainMesh=new THREE.Mesh(brainGeo,brainMat);
+  brainGroup.add(brainMesh);
+
+  /* ── CEREBELLUM ── */
+  const cbGeo=new THREE.SphereGeometry(0.88,80,80);
+  const cbPos=cbGeo.attributes.position;
+  for(let i=0;i<cbPos.count;i++){
+    const x=cbPos.getX(i),y=cbPos.getY(i),z=cbPos.getZ(i);
+    const L=Math.sqrt(x*x+y*y+z*z);
+    const nx=x/L,ny=y/L,nz=z/L;
+    const n=fbm(nx*4+5,ny*4+5,nz*4+5,5);
+    const sulc=Math.pow(Math.max(0,1-Math.abs(Math.sin(n*Math.PI*6))),5)*0.35;
+    const r=0.88+(n*0.2-sulc);
+    cbPos.setXYZ(i,nx*r,ny*r*0.78,nz*r*0.9);
+  }
+  cbGeo.computeVertexNormals();
+  const cbMesh=new THREE.Mesh(cbGeo,brainMat.clone());
+  cbMesh.position.set(-0.36,-1.12,-1.58);
+  brainGroup.add(cbMesh);
+
+  /* ── BRAINSTEM ── */
+  const bsGeo=new THREE.CylinderGeometry(0.22,0.33,1.4,20);
+  const bsMat=new THREE.MeshStandardMaterial({color:0xC0BDB5,roughness:.88,metalness:.01});
+  const bsMesh=new THREE.Mesh(bsGeo,bsMat);
+  bsMesh.position.set(0.1,-2.48,-0.42);
+  bsMesh.rotation.x=.26;
+  brainGroup.add(bsMesh);
+
+  /* ── REGION HOTSPOTS ── */
+  REGIONS.forEach((r,i)=>{
+    const g=new THREE.SphereGeometry(r.r,16,16);
+    const m=new THREE.MeshStandardMaterial({
+      color:r.color,
+      emissive:new THREE.Color(r.color).multiplyScalar(.35),
+      roughness:.5,metalness:.1,
+      transparent:true,opacity:.5
+    });
+    hotMats.push(m);
+    const mesh=new THREE.Mesh(g,m);
+    mesh.position.set(...r.pos);
+    mesh.userData=r;
+    hotMeshes.push(mesh);
+    brainGroup.add(mesh);
+  });
+
+  /* ── NEURAL PARTICLES ── */
+  const pCount=340;
+  const pGeo=new THREE.BufferGeometry();
+  const pArr=new Float32Array(pCount*3);
+  for(let i=0;i<pCount;i++){
+    const th=Math.random()*Math.PI*2;
+    const ph=Math.acos(Math.random()*2-1);
+    const r=3.2+Math.random()*2.2;
+    pArr[i*3]=r*Math.sin(ph)*Math.cos(th);
+    pArr[i*3+1]=r*Math.sin(ph)*Math.sin(th);
+    pArr[i*3+2]=r*Math.cos(ph);
+  }
+  pGeo.setAttribute('position',new THREE.BufferAttribute(pArr,3));
+  const pMat=new THREE.PointsMaterial({color:0x2D6132,size:.032,transparent:true,opacity:.55});
+  const particles=new THREE.Points(pGeo,pMat);
+  scene.add(particles);
+
+  /* ── LIGHTS ── */
+  // Key light: cool white from upper left
+  const key=new THREE.DirectionalLight(0xE8ECE8,2.2);
+  key.position.set(-3,3,4);
+  scene.add(key);
+  // Fill: warm from right
+  const fill=new THREE.DirectionalLight(0xC8D4C8,0.7);
+  fill.position.set(4,0,1);
+  scene.add(fill);
+  // Rim: green from behind for WKW nod
+  const rim=new THREE.PointLight(0x1A5C20,2.5,14);
+  rim.position.set(0,-1,-6);
+  scene.add(rim);
+  // Ambient
+  const amb=new THREE.AmbientLight(0x181C18,1.8);
+  scene.add(amb);
+  // Top light
+  const top=new THREE.PointLight(0xD0D8D0,1.2,12);
+  top.position.set(0,6,0);
+  scene.add(top);
+
+  /* ── HTML LABELS ── */
+  const lw=document.getElementById('labels');
+  REGIONS.forEach(r=>{
+    const el=document.createElement('div');
+    el.className='rlabel';
+    el.dataset.id=r.id;
+    el.textContent=r.name;
+    lw.appendChild(el);
+    labelEls.push({el,r});
+  });
+
+  /* start loop */
+  loop(particles);
+}
+
+/* ── GROUPS & MESHES ── */
+const brainGroup=new THREE.Group();
+scene.add(brainGroup);
+const hotMeshes=[];
+const hotMats=[];
+const labelEls=[];
+
+/* ── ROTATION CONTROL ── */
+let drag=false,prev={x:0,y:0},auto=true;
+const domEl=document.getElementById('canvas');
+domEl.addEventListener('mousedown',e=>{drag=true;auto=false;prev={x:e.clientX,y:e.clientY};});
+domEl.addEventListener('touchstart',e=>{drag=true;auto=false;prev={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
+window.addEventListener('mouseup',()=>{drag=false;setTimeout(()=>auto=true,2500);});
+window.addEventListener('touchend',()=>{drag=false;setTimeout(()=>auto=true,2500);});
+window.addEventListener('mousemove',e=>{
+  if(!drag)return;
+  brainGroup.rotation.y+=(e.clientX-prev.x)*.009;
+  brainGroup.rotation.x+=(e.clientY-prev.y)*.009;
+  prev={x:e.clientX,y:e.clientY};
+});
+window.addEventListener('touchmove',e=>{
+  if(!drag)return;
+  brainGroup.rotation.y+=(e.touches[0].clientX-prev.x)*.009;
+  brainGroup.rotation.x+=(e.touches[0].clientY-prev.y)*.009;
+  prev={x:e.touches[0].clientX,y:e.touches[0].clientY};
+},{passive:true});
+
+/* ── RAYCASTING ── */
+const ray=new THREE.Raycaster();
+const mv=new THREE.Vector2();
+let lmp={x:0,y:0};
+window.addEventListener('mousemove',e=>{lmp={x:e.clientX,y:e.clientY};});
+domEl.addEventListener('click',e=>{
+  mv.x=(e.clientX/window.innerWidth)*2-1;
+  mv.y=-(e.clientY/window.innerHeight)*2+1;
+  ray.setFromCamera(mv,camera);
+  const hits=ray.intersectObjects(hotMeshes);
+  if(hits.length)openPanel(hits[0].object.userData);
+});
+
+function openPanel(r){
+  hotMats.forEach((m,i)=>{m.emissive.set(new THREE.Color(REGIONS[i].color).multiplyScalar(.35));});
+  const idx=REGIONS.findIndex(x=>x.id===r.id);
+  if(idx>=0)hotMats[idx].emissive.set(new THREE.Color(REGIONS[idx].color).multiplyScalar(.9));
+  document.getElementById('ptag').textContent='Brain Region';
+  document.getElementById('pname').textContent=r.name;
+  document.getElementById('psub').textContent=r.sub;
+  document.getElementById('ptext').textContent=r.text;
+  const c=document.getElementById('pconn');
+  c.textContent=r.conn;c.style.display='block';
+  document.getElementById('panel').classList.add('open');
+}
+function closePanel(){
+  document.getElementById('panel').classList.remove('open');
+  hotMats.forEach((m,i)=>{m.emissive.set(new THREE.Color(REGIONS[i].color).multiplyScalar(.35));});
+}
+window.closePanel=closePanel;
+
+/* ── UPDATE LABELS ── */
+const tmp3=new THREE.Vector3();
+function updateLabels(){
+  const nW=window.innerWidth,nH=window.innerHeight;
+  labelEls.forEach(({el,r})=>{
+    tmp3.set(...r.pos);
+    brainGroup.localToWorld(tmp3);
+    tmp3.project(camera);
+    el.style.left=(tmp3.x*.5+.5)*nW+'px';
+    el.style.top=(-.5*tmp3.y+.5)*nH-22+'px';
+    // hide if behind
+    el.style.opacity=tmp3.z<1?'.55':'0';
+  });
+}
+
+/* ── HOVER ── */
+function checkHover(){
+  mv.x=(lmp.x/window.innerWidth)*2-1;
+  mv.y=-(lmp.y/window.innerHeight)*2+1;
+  ray.setFromCamera(mv,camera);
+  const hits=ray.intersectObjects(hotMeshes);
+  domEl.style.cursor=hits.length?'pointer':'default';
+  labelEls.forEach(({el})=>el.classList.remove('lit'));
+  if(hits.length){
+    const lel=labelEls.find(x=>x.r.id===hits[0].object.userData.id);
+    if(lel)lel.el.classList.add('lit');
+  }
+}
+
+/* ── MAIN LOOP ── */
+let t=0;
+function loop(particles){
+  requestAnimationFrame(()=>loop(particles));
+  t+=.007;
+  if(auto&&!drag)brainGroup.rotation.y+=.0025;
+  // Pulsing hotspots
+  hotMeshes.forEach((m,i)=>{
+    hotMats[i].opacity=.42+Math.sin(t+i*1.1)*.1;
+    m.scale.setScalar(.96+Math.sin(t*1.2+i*.8)*.04);
+  });
+  if(particles)particles.rotation.y+=.0004;
+  checkHover();
+  updateLabels();
+  renderer.render(scene,camera);
+}
+
+window.addEventListener('resize',()=>{
+  const nW=window.innerWidth,nH=window.innerHeight;
+  camera.aspect=nW/nH;camera.updateProjectionMatrix();
+  renderer.setSize(nW,nH);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Bisma Afzal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Epilogue:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--white:#FAFAF7;--ink:#0D0D0B;--muted:#9A9A94;--green:#2B5C3A;--rule:#E5E4E0;}
+body{background:var(--white);color:var(--ink);font-family:'Epilogue',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 40px;height:56px;border-bottom:1px solid var(--rule);background:rgba(250,250,247,0.94);backdrop-filter:blur(8px);}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:.92rem;font-style:italic;color:var(--ink);text-decoration:none;}
+.nav-links{display:flex;gap:32px;list-style:none;}
+.nav-links a{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s;}
+.nav-links a:hover,.nav-links a.on{color:var(--ink);}
+.nav-status{font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--green);}
+
+main{
+  padding:56px 40px 80px;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:0;max-width:1200px;margin:0 auto;min-height:100vh;align-items:start;
+}
+
+/* — LEFT — */
+.contact-left{padding:40px 80px 40px 0;border-right:1px solid var(--rule);min-height:calc(100vh - 56px);}
+.page-eyebrow{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--green);margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+.page-eyebrow::before{content:'';width:24px;height:1px;background:var(--green);}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,7vw,6rem);font-weight:300;line-height:.9;letter-spacing:-.02em;margin-bottom:36px;}
+.page-title em{font-style:italic;}
+.contact-intro{font-size:.85rem;line-height:1.82;color:var(--muted);max-width:400px;margin-bottom:48px;}
+
+.direct-links{display:flex;flex-direction:column;}
+.dlink{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 0;border-bottom:1px solid var(--rule);
+  text-decoration:none;color:var(--muted);
+  font-size:.78rem;transition:all .22s;
+}
+.dlink:hover{color:var(--ink);padding-left:6px;}
+.dlink-arr{font-size:.7rem;opacity:.3;transition:opacity .2s;}
+.dlink:hover .dlink-arr{opacity:1;color:var(--green);}
+
+.contact-meta{margin-top:48px;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);line-height:2;}
+
+/* — RIGHT (FORM) — */
+.contact-right{padding:40px 0 40px 60px;}
+.form-eyebrow{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--rule);}
+
+/* FORM FIELDS */
+.row{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.field{margin-bottom:0;padding:20px 0;border-bottom:1px solid var(--rule);}
+.field:first-child.half,.row .field:first-child{border-right:1px solid var(--rule);padding-right:24px;}
+.row .field:last-child{padding-left:24px;}
+label{display:block;font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+input,textarea{
+  width:100%;background:transparent;border:none;outline:none;
+  font-family:'Epilogue',sans-serif;font-weight:300;
+  font-size:.92rem;color:var(--ink);
+  padding:0;
+}
+input::placeholder,textarea::placeholder{color:#CCC9C2;font-style:italic;}
+textarea{resize:none;height:120px;line-height:1.7;}
+.field.full{border-bottom:1px solid var(--rule);padding:20px 0;}
+.field.msg{border-bottom:1px solid var(--rule);padding:20px 0;}
+
+.submit-row{display:flex;justify-content:space-between;align-items:center;padding-top:28px;}
+.submit-note{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.submit-btn{
+  font-family:'Epilogue',sans-serif;font-weight:300;
+  font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;
+  padding:13px 36px;
+  background:var(--ink);color:var(--white);
+  border:none;cursor:pointer;
+  transition:all .28s;
+}
+.submit-btn:hover{background:var(--green);}
+.submit-btn:disabled{background:#ccc;cursor:default;}
+
+.success{
+  display:none;margin-top:32px;
+  padding:24px;border:1px solid rgba(43,92,58,.3);
+  background:rgba(43,92,58,.04);
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:1rem;color:var(--green);line-height:1.6;
+}
+
+/* — SETUP CALLOUT — */
+.setup-box{
+  margin-top:32px;padding:20px 24px;
+  border:1px solid #E5E4E0;background:#F7F6F2;
+}
+.setup-box-title{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.setup-box p{font-size:.72rem;line-height:1.75;color:var(--muted);}
+.setup-box code{font-family:monospace;color:var(--green);font-size:.7rem;background:#EEE;padding:1px 5px;}
+
+.fi{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease;}
+.fi.in{opacity:1;transform:none;}
+
+footer{border-top:1px solid var(--rule);padding:18px 40px;display:flex;justify-content:space-between;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+
+@media(max-width:900px){
+  nav{padding:0 20px;}.nav-status{display:none;}.nav-links{gap:20px;}
+  main{grid-template-columns:1fr;padding:56px 24px 60px;}
+  .contact-left{border-right:none;border-bottom:1px solid var(--rule);padding:32px 0 40px;min-height:auto;}
+  .contact-right{padding:36px 0 0;}
+  .row{grid-template-columns:1fr;}
+  .row .field:first-child{border-right:none;padding-right:0;}
+  .row .field:last-child{padding-left:0;}
+  footer{flex-direction:column;gap:4px;}
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">Bisma Afzal</a>
+  <ul class="nav-links">
+    <li><a href="about.html">About</a></li>
+    <li><a href="projects.html">Projects</a></li>
+    <li><a href="brain.html">Brain</a></li>
+    <li><a href="contact.html" class="on">Contact</a></li>
+  </ul>
+  <div class="nav-status">Open to opportunities</div>
+</nav>
+
+<main>
+  <div class="contact-left fi">
+    <div class="page-eyebrow">Contact</div>
+    <h1 class="page-title">Let's<br><em>talk.</em></h1>
+    <p class="contact-intro">Open to research collaborations, MD/PhD program conversations, and opportunities at the intersection of neuroscience and data science.</p>
+
+    <div class="direct-links">
+      <a href="mailto:bismasafzal@gmail.com" class="dlink">
+        <span>bismasafzal@gmail.com</span>
+        <span class="dlink-arr">↗</span>
+      </a>
+      <a href="https://www.linkedin.com/in/bisma-afzal-3aa137251" target="_blank" class="dlink">
+        <span>LinkedIn — bisma-afzal-3aa137251</span>
+        <span class="dlink-arr">↗</span>
+      </a>
+      <a href="https://doi.org/10.64898/2026.01.22.698893" target="_blank" class="dlink">
+        <span>bioRxiv Preprint 2026</span>
+        <span class="dlink-arr">↗</span>
+      </a>
+      <a href="tel:8722031046" class="dlink">
+        <span>(872) 203-1046</span>
+        <span class="dlink-arr">↗</span>
+      </a>
+    </div>
+
+    <div class="contact-meta">
+      University of Illinois Chicago<br>
+      BS Neuroscience · Pre-MD/PhD Track<br>
+      Graduating May 2026 · Chicago, IL
+    </div>
+  </div>
+
+  <div class="contact-right fi">
+    <div class="form-eyebrow">Send a message — submissions go to bismasafzal@gmail.com</div>
+
+    <!--
+    ══════════════════════════════════════════
+    FORMSPREE SETUP (takes 2 minutes):
+    1. Go to formspree.io → create FREE account
+    2. Click "New Form" → enter bismasafzal@gmail.com
+    3. Copy your form ID (e.g. xpzvjwqk)
+    4. Replace YOUR_FORM_ID below with that ID
+    5. Every submission goes straight to your Gmail
+    ══════════════════════════════════════════
+    -->
+    <form id="form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" novalidate>
+      <div class="row">
+        <div class="field">
+          <label for="fn">First Name</label>
+          <input type="text" id="fn" name="firstName" placeholder="Jane" required>
+        </div>
+        <div class="field">
+          <label for="ln">Last Name</label>
+          <input type="text" id="ln" name="lastName" placeholder="Smith" required>
+        </div>
+      </div>
+      <div class="field full">
+        <label for="em">Email Address</label>
+        <input type="email" id="em" name="email" placeholder="jane@example.com" required>
+      </div>
+      <div class="field full">
+        <label for="su">Subject</label>
+        <input type="text" id="su" name="subject" placeholder="Research collaboration, PhD inquiry, general question…">
+      </div>
+      <div class="field msg">
+        <label for="mg">Message</label>
+        <textarea id="mg" name="message" placeholder="Your message…" required></textarea>
+      </div>
+      <input type="hidden" name="_subject" value="Portfolio Contact — Bisma Afzal">
+      <div class="submit-row">
+        <div class="submit-note">Reply within 2–3 business days</div>
+        <button type="submit" class="submit-btn" id="submitBtn">Send Message</button>
+      </div>
+    </form>
+
+    <div class="success" id="success">
+      Thank you — your message has been sent. I'll be in touch soon.
+    </div>
+
+    <div class="setup-box">
+      <div class="setup-box-title">⚙ One-time setup required</div>
+      <p>Open <code>contact.html</code> and replace <code>YOUR_FORM_ID</code> in the form action with your Formspree ID (free account at formspree.io). Takes 2 minutes and requires no backend.</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span>Bisma Afzal © 2026</span>
+  <span>N°004 — Contact</span>
+  <span>bismasafzal@gmail.com</span>
+</footer>
+
+<script>
+const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in');});},{threshold:.05});
+document.querySelectorAll('.fi').forEach(el=>io.observe(el));
+
+const form=document.getElementById('form');
+const btn=document.getElementById('submitBtn');
+form.addEventListener('submit',async e=>{
+  e.preventDefault();
+  btn.disabled=true;btn.textContent='Sending…';
+  try{
+    const res=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{Accept:'application/json'}});
+    if(res.ok){
+      form.style.display='none';
+      document.getElementById('success').style.display='block';
+    } else {
+      btn.disabled=false;btn.textContent='Try Again';
+      alert('There was an error. Please check your Formspree setup or email directly: bismasafzal@gmail.com');
+    }
+  } catch(err){
+    btn.disabled=false;btn.textContent='Send Message';
+    alert('Please complete Formspree setup first (see instructions below the form), or email bismasafzal@gmail.com directly.');
+  }
+});
+</script>
+</body>
+</html>
