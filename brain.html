@@ -3,464 +3,608 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brain Explorer — Bisma Afzal</title>
+<title>Science Converter — Bisma Afzal</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Epilogue:wght@200;300;400&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;background:#000;overflow:hidden;}
+:root{--white:#FAFAF7;--ink:#0D0D0B;--muted:#5C5C58;--green:#2B5C3A;--rule:#E5E4E0;}
+body{background:var(--white);color:var(--ink);font-family:'Epilogue',sans-serif;font-weight:300;overflow-x:hidden;}
 
-nav{position:fixed;top:0;left:0;right:0;z-index:200;height:48px;display:flex;justify-content:space-between;align-items:center;padding:0 36px;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.06);}
-.nav-logo{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:rgba(250,250,247,.85);text-decoration:none;}
-.nav-links{display:flex;gap:28px;list-style:none;}
-.nav-links a{font-family:'Epilogue',sans-serif;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.35);text-decoration:none;transition:color .2s;}
-.nav-links a:hover,.nav-links a.on{color:rgba(255,255,255,.8);}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0 40px;height:56px;border-bottom:1px solid var(--rule);background:rgba(250,250,247,0.94);backdrop-filter:blur(8px);}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:.92rem;font-style:italic;color:var(--ink);text-decoration:none;}
+.nav-links{display:flex;gap:32px;list-style:none;}
+.nav-links a{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s;}
+.nav-links a:hover,.nav-links a.on{color:var(--ink);}
+.nav-status{font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--green);}
 
-#canvas{position:fixed;inset:0;z-index:1;}
+main{padding:56px 40px 80px;max-width:1200px;margin:0 auto;}
 
-/* — INFO PANEL — */
-.panel{
-  position:fixed;right:0;top:0;bottom:0;z-index:100;
-  width:300px;background:rgba(5,5,5,.96);backdrop-filter:blur(20px);
-  border-left:1px solid rgba(43,92,58,.25);
-  padding:72px 32px 36px;
-  display:flex;flex-direction:column;
-  transform:translateX(100%);
-  transition:transform .5s cubic-bezier(.23,1,.32,1);
+/* PAGE HEADER */
+.page-header{display:flex;justify-content:space-between;align-items:flex-end;padding:40px 0 24px;border-bottom:1px solid var(--rule);margin-bottom:48px;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,5rem);font-weight:300;line-height:.92;letter-spacing:-.02em;}
+.page-title em{font-style:italic;}
+.page-meta{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:right;line-height:1.7;}
+
+/* TWO COLUMN */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--rule);}
+
+/* LEFT — CHAT */
+.conv-left{border-right:1px solid var(--rule);display:flex;flex-direction:column;min-height:560px;}
+.conv-header{padding:20px 28px;border-bottom:1px solid var(--rule);}
+.conv-eyebrow{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.conv-hint{font-size:.72rem;color:var(--muted);line-height:1.6;}
+.conv-hint code{font-family:monospace;color:var(--green);background:rgba(43,92,58,.07);padding:1px 5px;font-size:.7rem;}
+
+.chat-window{flex:1;overflow-y:auto;padding:20px 28px;display:flex;flex-direction:column;gap:16px;min-height:340px;max-height:420px;}
+.chat-empty{text-align:center;margin:auto;color:var(--muted);font-size:.75rem;line-height:2;padding:32px 0;}
+.chat-empty .eg{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;color:var(--muted);opacity:.7;}
+
+.bubble-wrap{display:flex;flex-direction:column;gap:6px;}
+.bubble-q{
+  align-self:flex-end;
+  background:var(--ink);color:var(--white);
+  padding:9px 16px;font-size:.78rem;max-width:80%;
+  border-radius:0;
 }
-.panel.open{transform:translateX(0);}
-.panel-close{
-  position:absolute;top:16px;right:16px;
-  width:28px;height:28px;border:1px solid rgba(255,255,255,.12);
-  background:none;color:rgba(255,255,255,.4);
-  font-size:.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:all .2s;
+.bubble-a{
+  align-self:flex-start;border:1px solid var(--rule);
+  padding:14px 18px;max-width:92%;
 }
-.panel-close:hover{border-color:rgba(43,92,58,.8);color:#4E9A52;}
-.p-tag{font-family:'Epilogue',sans-serif;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:#4E9A52;margin-bottom:10px;}
-.p-name{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;color:#FAFAF7;line-height:1.1;margin-bottom:6px;}
-.p-sub{font-family:'Epilogue',sans-serif;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:20px;}
-.p-rule{height:1px;background:rgba(43,92,58,.25);margin-bottom:20px;}
-.p-text{font-family:'Cormorant Garamond',serif;font-size:.95rem;line-height:1.85;color:rgba(250,250,247,.65);flex:1;}
-.p-conn{margin-top:20px;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.88rem;line-height:1.75;color:#4E9A52;display:none;padding-top:16px;border-top:1px solid rgba(43,92,58,.2);}
-
-/* — HINT — */
-.hint{
-  position:fixed;bottom:32px;left:50%;transform:translateX(-50%);z-index:50;
-  font-family:'Epilogue',sans-serif;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
-  color:rgba(255,255,255,.25);pointer-events:none;
-  animation:hpulse 2.5s ease-in-out infinite;
+.bubble-main{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.5rem;font-weight:300;
+  color:var(--ink);margin-bottom:8px;
 }
-@keyframes hpulse{0%,100%{opacity:.25}50%{opacity:.55}}
+.bubble-main .eq-sign{color:var(--muted);font-style:italic;margin:0 6px;}
+.bubble-main .result{color:var(--green);}
+.bubble-others{display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid var(--rule);padding-top:10px;margin-top:4px;}
+.bub-chip{font-size:.64rem;letter-spacing:.06em;background:#F0EFE9;padding:3px 10px;color:var(--ink);}
+.bub-chip.active-chip{background:rgba(43,92,58,.1);color:var(--green);}
+.bubble-err{font-size:.78rem;color:#a05050;font-style:italic;}
 
-/* — REGION LABELS — */
-#labels{position:fixed;inset:0;pointer-events:none;z-index:20;}
-.rlabel{
-  position:absolute;transform:translate(-50%,-50%);
-  font-family:'Epilogue',sans-serif;font-size:.55rem;
-  letter-spacing:.16em;text-transform:uppercase;
-  color:rgba(78,154,82,.55);white-space:nowrap;
-  transition:color .25s,opacity .25s;
-  pointer-events:none;
+.chat-input-row{
+  display:flex;border-top:1px solid var(--rule);
+  padding:0;
 }
-.rlabel.lit{color:#7BCF80;}
+.chat-input-row input{
+  flex:1;background:transparent;border:none;outline:none;
+  font-family:'Epilogue',sans-serif;font-weight:300;font-size:.85rem;
+  color:var(--ink);padding:16px 20px;
+}
+.chat-input-row input::placeholder{color:#BBBBBB;font-style:italic;}
+.chat-send{
+  padding:0 22px;background:var(--ink);color:var(--white);
+  border:none;cursor:pointer;font-family:'Epilogue',sans-serif;
+  font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;
+  transition:background .22s;flex-shrink:0;
+}
+.chat-send:hover{background:var(--green);}
 
-@media(max-width:640px){
-  nav{padding:0 20px;}.nav-links{display:none;}
-  .panel{width:100%;height:55vh;top:auto;transform:translateY(100%);border-left:none;border-top:1px solid rgba(43,92,58,.25);}
-  .panel.open{transform:translateY(0);}
+/* RIGHT — CATEGORY CONVERTER */
+.conv-right{display:flex;flex-direction:column;}
+.cat-tabs{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--rule);}
+.cat-tab{
+  padding:11px 14px;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);background:transparent;border:none;cursor:pointer;
+  border-right:1px solid var(--rule);border-bottom:2px solid transparent;
+  transition:all .18s;white-space:nowrap;
+}
+.cat-tab:hover{color:var(--ink);}
+.cat-tab.on{color:var(--green);border-bottom-color:var(--green);background:rgba(43,92,58,.04);}
+
+.cat-body{padding:24px 28px;flex:1;}
+.converter-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-bottom:20px;}
+.unit-box{display:flex;flex-direction:column;gap:8px;}
+.unit-label{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);}
+.unit-input{
+  width:100%;background:transparent;border:none;border-bottom:1px solid var(--rule);
+  font-family:'Epilogue',sans-serif;font-size:1.1rem;font-weight:300;
+  color:var(--ink);padding:8px 0;outline:none;transition:border-color .2s;
+}
+.unit-input:focus{border-bottom-color:var(--green);}
+.unit-select{
+  width:100%;background:var(--white);border:1px solid var(--rule);
+  font-family:'Epilogue',sans-serif;font-size:.78rem;font-weight:300;
+  color:var(--ink);padding:7px 10px;outline:none;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239A9A94'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;
+}
+.swap-btn{
+  background:transparent;border:1px solid var(--rule);
+  width:36px;height:36px;cursor:pointer;font-size:1rem;
+  color:var(--muted);transition:all .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.swap-btn:hover{background:var(--ink);color:var(--white);border-color:var(--ink);}
+
+.big-result{
+  background:#F5F4F0;border:1px solid var(--rule);padding:20px 22px;margin-bottom:20px;
+  display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.big-result-val{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--green);}
+.big-result-unit{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--muted);font-style:italic;}
+.big-result-eq{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+
+.all-table{border-top:1px solid var(--rule);}
+.all-table-head{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);padding:10px 0 8px;border-bottom:1px solid var(--rule);}
+.all-row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--rule);}
+.all-row:last-child{border-bottom:none;}
+.all-row.highlighted{background:rgba(43,92,58,.05);margin:0 -6px;padding:9px 6px;}
+.all-unit{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.all-val{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--ink);}
+
+/* QUICK REF GRID */
+.qref-section{margin-top:2px;border:1px solid var(--rule);}
+.qref-header{padding:16px 24px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;}
+.qref-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-style:italic;color:var(--ink);}
+.qref-sub{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.qref-grid{display:grid;grid-template-columns:repeat(4,1fr);}
+.qref-col{border-right:1px solid var(--rule);padding:20px 24px;}
+.qref-col:last-child{border-right:none;}
+.qref-cat{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--green);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--rule);}
+.qref-row{display:flex;justify-content:space-between;font-size:.72rem;padding:5px 0;border-bottom:1px solid rgba(229,228,224,.6);color:var(--ink);}
+.qref-row:last-child{border-bottom:none;}
+.qref-from{color:var(--muted);}
+.qref-factor{font-family:'Cormorant Garamond',serif;font-size:.8rem;color:var(--green);}
+
+.fi{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease;}
+.fi.in{opacity:1;transform:none;}
+
+footer{border-top:1px solid var(--rule);padding:18px 40px;display:flex;justify-content:space-between;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+
+@media(max-width:900px){
+  nav{padding:0 20px;}.nav-status{display:none;}.nav-links{gap:20px;}
+  main{padding:56px 20px 60px;}
+  .grid-2{grid-template-columns:1fr;}
+  .conv-left{border-right:none;border-bottom:1px solid var(--rule);}
+  .converter-row{grid-template-columns:1fr auto 1fr;}
+  .qref-grid{grid-template-columns:1fr 1fr;}
+  .qref-col:nth-child(2){border-right:none;}
+  .qref-col:nth-child(3){border-top:1px solid var(--rule);}
+  .qref-col:nth-child(4){border-top:1px solid var(--rule);border-right:none;}
+  footer{flex-direction:column;gap:4px;}
+}
+@media(max-width:540px){
+  .qref-grid{grid-template-columns:1fr;}
+  .qref-col{border-right:none;border-bottom:1px solid var(--rule);}
+  .converter-row{grid-template-columns:1fr;gap:14px;}
+  .swap-btn{width:100%;height:32px;}
 }
 </style>
 </head>
 <body>
-
 <nav>
   <a href="index.html" class="nav-logo">Bisma Afzal</a>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
     <li><a href="about.html">About</a></li>
     <li><a href="projects.html">Projects</a></li>
-    <li><a href="brain.html" class="on">Brain</a></li>
+    <li><a href="brain.html" class="on">Converter</a></li>
     <li><a href="contact.html">Contact</a></li>
   </ul>
+  <div class="nav-status">Science Tools</div>
 </nav>
 
-<canvas id="canvas"></canvas>
-<div id="labels"></div>
+<main>
+  <div class="page-header fi">
+    <h1 class="page-title">Science<br><em>Converter</em></h1>
+    <div class="page-meta">Unit Tools / 2026<br>N°003 — Converter</div>
+  </div>
 
-<div class="panel" id="panel">
-  <button class="panel-close" onclick="closePanel()">✕</button>
-  <div class="p-tag" id="ptag">Select a Region</div>
-  <div class="p-name" id="pname">Brain Explorer</div>
-  <div class="p-sub" id="psub">Drag to rotate · Click regions</div>
-  <div class="p-rule"></div>
-  <p class="p-text" id="ptext">Click any glowing region of the brain to explore its anatomy, function, and connection to Alzheimer's disease research.</p>
-  <p class="p-conn" id="pconn"></p>
-</div>
+  <div class="grid-2 fi">
+    <!-- LEFT: CONVERSATIONAL -->
+    <div class="conv-left">
+      <div class="conv-header">
+        <div class="conv-eyebrow">Conversational Input</div>
+        <div class="conv-hint">
+          Type a conversion in plain language — e.g. <code>5 mmol to mol</code>, <code>100 uL to mL</code>, <code>37 C to F</code>, <code>1 atm to mmHg</code>
+        </div>
+      </div>
+      <div class="chat-window" id="chatWin">
+        <div class="chat-empty" id="chatEmpty">
+          Start typing a conversion below<br>
+          <span class="eg">5 mM to µM · 250 mg to g · 72 F to C</span>
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chatIn" placeholder="e.g. 5 mmol to mol or 100 uL to mL…" autocomplete="off">
+        <button class="chat-send" onclick="handleChat()">Convert →</button>
+      </div>
+    </div>
 
-<div class="hint">Drag to rotate &nbsp;·&nbsp; Click regions to explore</div>
+    <!-- RIGHT: CATEGORY CONVERTER -->
+    <div class="conv-right">
+      <div class="cat-tabs" id="catTabs">
+        <button class="cat-tab on" onclick="setcat('volume',this)">Volume</button>
+        <button class="cat-tab" onclick="setcat('length',this)">Length</button>
+        <button class="cat-tab" onclick="setcat('mass',this)">Mass</button>
+        <button class="cat-tab" onclick="setcat('moles',this)">Moles</button>
+        <button class="cat-tab" onclick="setcat('conc',this)">Conc.</button>
+        <button class="cat-tab" onclick="setcat('temp',this)">Temp.</button>
+        <button class="cat-tab" onclick="setcat('time',this)">Time</button>
+        <button class="cat-tab" onclick="setcat('pressure',this)">Pressure</button>
+      </div>
+      <div class="cat-body">
+        <div class="converter-row">
+          <div class="unit-box">
+            <div class="unit-label">Value</div>
+            <input type="number" class="unit-input" id="fromVal" value="1" oninput="recalc()">
+            <select class="unit-select" id="fromUnit" onchange="recalc()"></select>
+          </div>
+          <button class="swap-btn" onclick="swapUnits()" title="Swap units">⇄</button>
+          <div class="unit-box">
+            <div class="unit-label">Convert to</div>
+            <input type="number" class="unit-input" id="toVal" readonly style="cursor:default;color:var(--green);">
+            <select class="unit-select" id="toUnit" onchange="recalc()"></select>
+          </div>
+        </div>
+        <div class="big-result">
+          <div>
+            <div class="big-result-eq" id="bigEq">1 µL =</div>
+            <div class="big-result-val" id="bigVal">0.001</div>
+          </div>
+          <div class="big-result-unit" id="bigUnit">mL</div>
+        </div>
+        <div class="all-table">
+          <div class="all-table-head">All conversions for this value</div>
+          <div id="allRows"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK REFERENCE -->
+  <div class="qref-section fi" style="margin-top:2px;">
+    <div class="qref-header">
+      <div class="qref-title">Quick Reference</div>
+      <div class="qref-sub">Common lab conversion factors</div>
+    </div>
+    <div class="qref-grid">
+      <div class="qref-col">
+        <div class="qref-cat">Volume</div>
+        <div class="qref-row"><span class="qref-from">1 µL</span><span class="qref-factor">= 0.001 mL</span></div>
+        <div class="qref-row"><span class="qref-from">1 mL</span><span class="qref-factor">= 0.001 L</span></div>
+        <div class="qref-row"><span class="qref-from">1 µL</span><span class="qref-factor">= 1×10⁻⁶ L</span></div>
+        <div class="qref-row"><span class="qref-from">1 dL</span><span class="qref-factor">= 100 mL</span></div>
+        <div class="qref-row"><span class="qref-from">1 nL</span><span class="qref-factor">= 0.001 µL</span></div>
+        <div class="qref-cat" style="margin-top:16px;">Moles</div>
+        <div class="qref-row"><span class="qref-from">1 mmol</span><span class="qref-factor">= 0.001 mol</span></div>
+        <div class="qref-row"><span class="qref-from">1 µmol</span><span class="qref-factor">= 1×10⁻⁶ mol</span></div>
+        <div class="qref-row"><span class="qref-from">1 nmol</span><span class="qref-factor">= 1×10⁻⁹ mol</span></div>
+        <div class="qref-row"><span class="qref-from">1 pmol</span><span class="qref-factor">= 1×10⁻¹² mol</span></div>
+      </div>
+      <div class="qref-col">
+        <div class="qref-cat">Length</div>
+        <div class="qref-row"><span class="qref-from">1 nm</span><span class="qref-factor">= 0.001 µm</span></div>
+        <div class="qref-row"><span class="qref-from">1 µm</span><span class="qref-factor">= 0.001 mm</span></div>
+        <div class="qref-row"><span class="qref-from">1 mm</span><span class="qref-factor">= 0.1 cm</span></div>
+        <div class="qref-row"><span class="qref-from">1 cm</span><span class="qref-factor">= 0.01 m</span></div>
+        <div class="qref-row"><span class="qref-from">1 Å</span><span class="qref-factor">= 0.1 nm</span></div>
+        <div class="qref-row"><span class="qref-from">1 nm</span><span class="qref-factor">= 10 Å</span></div>
+        <div class="qref-cat" style="margin-top:16px;">Mass</div>
+        <div class="qref-row"><span class="qref-from">1 ng</span><span class="qref-factor">= 0.001 µg</span></div>
+        <div class="qref-row"><span class="qref-from">1 µg</span><span class="qref-factor">= 0.001 mg</span></div>
+        <div class="qref-row"><span class="qref-from">1 mg</span><span class="qref-factor">= 0.001 g</span></div>
+        <div class="qref-row"><span class="qref-from">1 g</span><span class="qref-factor">= 0.001 kg</span></div>
+      </div>
+      <div class="qref-col">
+        <div class="qref-cat">Concentration</div>
+        <div class="qref-row"><span class="qref-from">1 mM</span><span class="qref-factor">= 0.001 M</span></div>
+        <div class="qref-row"><span class="qref-from">1 µM</span><span class="qref-factor">= 1×10⁻⁶ M</span></div>
+        <div class="qref-row"><span class="qref-from">1 nM</span><span class="qref-factor">= 1×10⁻⁹ M</span></div>
+        <div class="qref-row"><span class="qref-from">1 pM</span><span class="qref-factor">= 1×10⁻¹² M</span></div>
+        <div class="qref-row"><span class="qref-from">1 µM</span><span class="qref-factor">= 1000 nM</span></div>
+        <div class="qref-cat" style="margin-top:16px;">Temperature</div>
+        <div class="qref-row"><span class="qref-from">0°C</span><span class="qref-factor">= 32°F = 273.15 K</span></div>
+        <div class="qref-row"><span class="qref-from">37°C</span><span class="qref-factor">= 98.6°F</span></div>
+        <div class="qref-row"><span class="qref-from">100°C</span><span class="qref-factor">= 212°F</span></div>
+        <div class="qref-row"><span class="qref-from">−196°C</span><span class="qref-factor">= 77.15 K (LN₂)</span></div>
+      </div>
+      <div class="qref-col">
+        <div class="qref-cat">Pressure</div>
+        <div class="qref-row"><span class="qref-from">1 atm</span><span class="qref-factor">= 101,325 Pa</span></div>
+        <div class="qref-row"><span class="qref-from">1 atm</span><span class="qref-factor">= 760 mmHg</span></div>
+        <div class="qref-row"><span class="qref-from">1 atm</span><span class="qref-factor">= 1.01325 bar</span></div>
+        <div class="qref-row"><span class="qref-from">1 kPa</span><span class="qref-factor">= 7.50 mmHg</span></div>
+        <div class="qref-row"><span class="qref-from">1 psi</span><span class="qref-factor">= 6894.76 Pa</span></div>
+        <div class="qref-cat" style="margin-top:16px;">Time</div>
+        <div class="qref-row"><span class="qref-from">1 s</span><span class="qref-factor">= 1000 ms</span></div>
+        <div class="qref-row"><span class="qref-from">1 min</span><span class="qref-factor">= 60 s</span></div>
+        <div class="qref-row"><span class="qref-from">1 h</span><span class="qref-factor">= 3600 s</span></div>
+        <div class="qref-row"><span class="qref-from">1 d</span><span class="qref-factor">= 86,400 s</span></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span>Bisma Afzal © 2026</span>
+  <span>N°003 — Converter</span>
+  <span>bismasafzal@gmail.com</span>
+</footer>
 
 <script>
-/* ══════════════════════════════════════════════
-   BRAIN DATA
-══════════════════════════════════════════════ */
-const REGIONS=[
-  {id:'frontal',name:'Frontal Lobe',sub:'Executive Function & Motor Control',color:0x52B85C,
-   pos:[-0.5,0.6,1.95],r:.42,
-   text:'The frontal lobe governs executive functions: decision-making, working memory, impulse control, planning, and voluntary movement. The prefrontal cortex shapes personality and complex reasoning.',
-   conn:'Neuroinflammatory gene expression in the frontal cortex is a key focus of my research at the Gao Lab — characterized using HCR-FISH and expansion microscopy in Alzheimer\'s disease mouse models.'},
-  {id:'parietal',name:'Parietal Lobe',sub:'Sensory Integration & Spatial Awareness',color:0x52A8A8,
-   pos:[0.0,1.6,0.55],r:.38,
-   text:'The parietal lobe integrates sensory input from the body — touch, temperature, proprioception — via the somatosensory cortex, and directs visuospatial attention.',
-   conn:'Parietal cortex thinning is a documented structural biomarker in Alzheimer\'s disease, associated with visuospatial deficits. My 3D spatial transcriptomics work profiles this region at the cellular level.'},
-  {id:'temporal',name:'Temporal Lobe',sub:'Memory, Language & Auditory Processing',color:0x5280B8,
-   pos:[-1.3,-0.1,1.2],r:.40,
-   text:'The temporal lobe processes auditory information, houses Wernicke\'s language area, and contains the hippocampus and amygdala — critical for long-term memory formation and emotional processing.',
-   conn:'Temporal lobe atrophy is the earliest neuroanatomical hallmark of Alzheimer\'s disease. I investigate single-cell neuroinflammatory gene expression here and in the adjacent entorhinal cortex.'},
-  {id:'occipital',name:'Occipital Lobe',sub:'Visual Processing',color:0xB8B852,
-   pos:[0.0,0.1,-2.1],r:.38,
-   text:'The occipital lobe contains the primary visual cortex (V1) and higher-order visual association areas. It processes color, motion, depth, and object recognition from signals arriving via the optic tract.',
-   conn:'Visual hallucinations in Lewy body dementia arise from occipital disruption. My bioRxiv 2026 preprint profiles brain-region-specific epitranscriptomic changes that include the occipital cortex.'},
-  {id:'hippocampus',name:'Hippocampus',sub:'Memory Consolidation & Spatial Navigation',color:0xA852B8,
-   pos:[-0.55,-0.4,0.9],r:.3,
-   text:'The hippocampus, embedded in the medial temporal lobe, converts short-term memories into long-term storage and enables spatial navigation via place cells. It is among the first structures to degenerate in Alzheimer\'s disease.',
-   conn:'Most directly relevant to my Alzheimer\'s research — I investigate lysosomal dysfunction and neuroinflammatory gene expression in the hippocampus at single-cell resolution. Topic of my oral presentation at UIC SURS 2025.'},
-  {id:'cerebellum',name:'Cerebellum',sub:'Motor Coordination & Balance',color:0x8CA852,
-   pos:[-0.35,-1.2,-1.55],r:.4,
-   text:'The cerebellum contains more than half of all brain neurons. It fine-tunes voluntary movement, balance, and posture, and is increasingly implicated in cognitive and emotional processing.',
-   conn:'Profiled in my 3D spatial transcriptomics preprint (bioRxiv 2026): cell-type-specific epitranscriptomic changes across brain regions including cerebellum following adolescent alcohol exposure.'},
-  {id:'brainstem',name:'Brainstem',sub:'Vital Functions & Neural Relay',color:0x8C9AA8,
-   pos:[0.1,-2.25,-0.3],r:.28,
-   text:'The brainstem (midbrain, pons, medulla oblongata) regulates breathing, heart rate, and blood pressure. It relays signals between brain and spinal cord and contains the nuclei for most cranial nerves.',
-   conn:'The locus coeruleus — a small brainstem nucleus — is one of the earliest sites of tau pathology in Alzheimer\'s disease, preceding cognitive symptoms by decades. A key frontier in AD neuroinflammation research.'}
-];
-
-/* ══════════════════════════════════════════════
-   SCENE SETUP
-══════════════════════════════════════════════ */
-const W=window.innerWidth,H=window.innerHeight;
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x000000);
-scene.fog=new THREE.FogExp2(0x000000,.032);
-
-const camera=new THREE.PerspectiveCamera(42,W/H,.1,100);
-camera.position.set(0,.2,7.5);
-
-const renderer=new THREE.WebGLRenderer({canvas:document.getElementById('canvas'),antialias:true});
-renderer.setSize(W,H);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-renderer.physicallyCorrectLights=true;
-
-/* ══════════════════════════════════════════════
-   NOISE (value noise + fbm)
-══════════════════════════════════════════════ */
-function h(x,y,z){
-  let n=Math.sin(x*127.1+y*311.7+z*74.7)*43758.5453123;
-  return n-Math.floor(n);
-}
-function sm(t){return t*t*(3-2*t);}
-function vn(x,y,z){
-  const ix=Math.floor(x),iy=Math.floor(y),iz=Math.floor(z);
-  const fx=x-ix,fy=y-iy,fz=z-iz;
-  const ux=sm(fx),uy=sm(fy),uz=sm(fz);
-  return (
-    (1-uz)*((1-uy)*((1-ux)*h(ix,iy,iz)+ux*h(ix+1,iy,iz))+uy*((1-ux)*h(ix,iy+1,iz)+ux*h(ix+1,iy+1,iz)))+
-    uz*((1-uy)*((1-ux)*h(ix,iy,iz+1)+ux*h(ix+1,iy,iz+1))+uy*((1-ux)*h(ix,iy+1,iz+1)+ux*h(ix+1,iy+1,iz+1)))
-  );
-}
-function fbm(x,y,z,oct){
-  let v=0,a=.5,f=1;
-  for(let i=0;i<oct;i++){v+=vn(x*f,y*f,z*f)*a;a*=.5;f*=2.07;}
-  return v;
-}
-
-/* ══════════════════════════════════════════════
-   BRAIN GEOMETRY (high-res JS displacement)
-   Goal: convincing gyri and sulci
-══════════════════════════════════════════════ */
-function buildBrain(){
-  // 220x220 gives ~48k vertices — good detail, fast enough
-  const geo=new THREE.SphereGeometry(2.05,220,220);
-  const pos=geo.attributes.position;
-  const N=pos.count;
-
-  for(let i=0;i<N;i++){
-    const x=pos.getX(i),y=pos.getY(i),z=pos.getZ(i);
-    const L=Math.sqrt(x*x+y*y+z*z);
-    // Normalize to sphere surface
-    let nx=x/L,ny=y/L,nz=z/L;
-
-    // === OVOID BRAIN SHAPE ===
-    // Real brain: wider front-to-back (z), slightly narrower top-bottom (y)
-    const ox=nx*1.04,oy=ny*0.92,oz=nz*1.14;
-    const oL=Math.sqrt(ox*ox+oy*oy+oz*oz);
-    nx=ox/oL;ny=oy/oL;nz=oz/oL;
-
-    // === LARGE-SCALE GYRI (coarse folds) ===
-    const f1=fbm(nx*2.2+10.5,ny*2.2,nz*2.2,6); // main undulation
-    const f2=fbm(nx*4.8+5.1,ny*4.8+3.3,nz*4.8,5); // medium folds
-
-    // === FINE SURFACE DETAIL ===
-    const f3=fbm(nx*9+22,ny*9+11,nz*9,3)*0.038;
-
-    // === SULCI (narrow grooves between gyri) ===
-    // The trick: grooves appear where sin(n) ≈ 0 — i.e., at zero crossings
-    // Power > 1 makes them narrower and sharper
-    const phase=f1*Math.PI*5.5+f2*1.8;
-    const gVal=Math.abs(Math.sin(phase)); // 0 at groove centres, 1 at ridge tops
-    // Groove depth: deepest at gVal≈0
-    const sulci=Math.pow(Math.max(0,1-gVal),5)*0.52;
-
-    // === INTERHEMISPHERIC FISSURE (top-centre, front-to-back) ===
-    // The brain has a deep central groove along the midline at the top
-    const fissXDist=Math.abs(nx); // 0 at midline
-    const fissYFactor=Math.max(0,ny*1.5); // only on upper hemisphere
-    const fissure=Math.max(0,(1-fissXDist*10)*fissYFactor)*0.28;
-
-    // === SYLVIAN FISSURE (lateral, rough horizontal groove) ===
-    // Runs roughly horizontally on the side of the brain
-    const sylvY=ny+0.1; // centred slightly above equator
-    const sylvX=Math.abs(Math.abs(nx)-0.85); // near the lateral edge
-    const sylvian=Math.max(0,1-sylvX*18)*Math.max(0,1-Math.abs(sylvY)*8)*0.22;
-
-    // === FLATTEN BASE for brainstem ===
-    const base=Math.max(0,-ny-0.18)*0.42;
-
-    // Final displacement
-    const disp=f1*0.28+f2*0.11+f3-sulci-fissure-sylvian-base;
-    const r=2.05+disp;
-
-    // Apply ovoid scaling
-    pos.setXYZ(i,nx*r*1.04,ny*r*0.92,nz*r*1.14);
+// ─── UNIT DATA ────────────────────────────────────────────────────────────────
+const CATS = {
+  volume:{
+    label:'Volume',base:'L',
+    units:{pL:1e-12,nL:1e-9,'µL':1e-6,mL:1e-3,cL:1e-2,dL:0.1,L:1,kL:1e3}
+  },
+  length:{
+    label:'Length',base:'m',
+    units:{'pm':1e-12,'Å':1e-10,'nm':1e-9,'µm':1e-6,'mm':1e-3,'cm':1e-2,'dm':0.1,'m':1,'km':1e3}
+  },
+  mass:{
+    label:'Mass',base:'g',
+    units:{pg:1e-12,ng:1e-9,'µg':1e-6,mg:1e-3,g:1,kg:1e3}
+  },
+  moles:{
+    label:'Moles',base:'mol',
+    units:{pmol:1e-12,nmol:1e-9,'µmol':1e-6,mmol:1e-3,mol:1}
+  },
+  conc:{
+    label:'Concentration',base:'M',
+    units:{pM:1e-12,nM:1e-9,'µM':1e-6,mM:1e-3,M:1}
+  },
+  temp:{
+    label:'Temperature',special:true,
+    units:{'°C':0,'°F':0,'K':0}
+  },
+  time:{
+    label:'Time',base:'s',
+    units:{ns:1e-9,'µs':1e-6,ms:1e-3,s:1,min:60,h:3600,d:86400}
+  },
+  pressure:{
+    label:'Pressure',base:'Pa',
+    units:{Pa:1,kPa:1e3,MPa:1e6,atm:101325,mmHg:133.322,torr:133.322,bar:1e5,mbar:100,psi:6894.76}
   }
-  geo.computeVertexNormals();
-  return geo;
-}
+};
 
-/* Show loading hint */
-const hint=document.querySelector('.hint');
-hint.textContent='Building brain…';
-setTimeout(()=>{
-  const brainGeo=buildBrain();
-  hint.textContent='Drag to rotate · Click regions to explore';
-  initScene(brainGeo);
-},50);
+// ─── UNIT ALIASES (for chat parser) ──────────────────────────────────────────
+const ALIAS = {
+  // Volume
+  'ul':'µL','uL':'µL','µl':'µL','microliter':'µL','microliters':'µL','ul':'µL',
+  'ml':'mL','milliliter':'mL','milliliters':'mL','cc':'mL',
+  'l':'L','liter':'L','liters':'L','litre':'L','litres':'L',
+  'dl':'dL','cl':'cL','nl':'nL','pl':'pL',
+  // Length
+  'angstrom':'Å','angstroms':'Å','a':'Å',
+  'um':'µm','micrometer':'µm','micrometers':'µm','micron':'µm','microns':'µm',
+  'nanometer':'nm','nanometers':'nm',
+  'millimeter':'mm','millimeters':'mm',
+  'centimeter':'cm','centimeters':'cm',
+  'meter':'m','meters':'m',
+  'kilometer':'km','kilometers':'km',
+  'picometer':'pm','picometers':'pm',
+  // Mass
+  'ug':'µg','mcg':'µg','microgram':'µg','micrograms':'µg',
+  'milligram':'mg','milligrams':'mg',
+  'gram':'g','grams':'g',
+  'kilogram':'kg','kilograms':'kg',
+  'nanogram':'ng','nanograms':'ng',
+  'picogram':'pg','picograms':'pg',
+  // Moles
+  'umol':'µmol','micromol':'µmol','micromole':'µmol','micromoles':'µmol',
+  'millimol':'mmol','millimole':'mmol','millimoles':'mmol',
+  'nanomol':'nmol','nanomole':'nmol','nanomoles':'nmol',
+  'picomol':'pmol','picomole':'pmol','picomoles':'pmol',
+  'mole':'mol','moles':'mol',
+  // Concentration
+  'uM':'µM','um':'µM','micromolar':'µM',
+  'millimolar':'mM','nanomolar':'nM','picomolar':'pM','molar':'M',
+  // Temperature
+  'c':'°C','°c':'°C','celsius':'°C','centigrade':'°C',
+  'f':'°F','°f':'°F','fahrenheit':'°F',
+  'k':'K','kelvin':'K',
+  // Time
+  'millisecond':'ms','milliseconds':'ms',
+  'second':'s','seconds':'s','sec':'s','secs':'s',
+  'minute':'min','minutes':'min','mins':'min',
+  'hour':'h','hours':'h','hr':'h','hrs':'h',
+  'day':'d','days':'d',
+  'nanosecond':'ns','nanoseconds':'ns',
+  'us':'µs','microsecond':'µs','microseconds':'µs',
+  // Pressure
+  'pa':'Pa','pascal':'Pa','pascals':'Pa',
+  'kpa':'kPa','kilopascal':'kPa','kilopascals':'kPa',
+  'mpa':'MPa','megapascal':'MPa',
+  'atmosphere':'atm','atmospheres':'atm',
+  'mmhg':'mmHg','torr':'torr',
+  'millibar':'mbar',
+  'bar':'bar',
+};
 
-function initScene(brainGeo){
-  /* ── BRAIN MESH ── */
-  const brainMat=new THREE.MeshStandardMaterial({
-    color:0xD0CCBE, // warm off-white, like real brain
-    emissive:0x0A1208,
-    roughness:.82,
-    metalness:.02,
-  });
-  const brainMesh=new THREE.Mesh(brainGeo,brainMat);
-  brainGroup.add(brainMesh);
-
-  /* ── CEREBELLUM ── */
-  const cbGeo=new THREE.SphereGeometry(0.88,80,80);
-  const cbPos=cbGeo.attributes.position;
-  for(let i=0;i<cbPos.count;i++){
-    const x=cbPos.getX(i),y=cbPos.getY(i),z=cbPos.getZ(i);
-    const L=Math.sqrt(x*x+y*y+z*z);
-    const nx=x/L,ny=y/L,nz=z/L;
-    const n=fbm(nx*4+5,ny*4+5,nz*4+5,5);
-    const sulc=Math.pow(Math.max(0,1-Math.abs(Math.sin(n*Math.PI*6))),5)*0.35;
-    const r=0.88+(n*0.2-sulc);
-    cbPos.setXYZ(i,nx*r,ny*r*0.78,nz*r*0.9);
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function fmt(n){
+  if(n===null||isNaN(n)) return '?';
+  if(n===0) return '0';
+  const abs=Math.abs(n);
+  if(abs>=1e9||(abs<1e-5&&abs>0)){
+    let s=n.toExponential(4);
+    // make superscript-friendly
+    return s.replace(/e([+-]\d+)/,(m,e)=>`×10<sup>${e.replace('+','')}</sup>`);
   }
-  cbGeo.computeVertexNormals();
-  const cbMesh=new THREE.Mesh(cbGeo,brainMat.clone());
-  cbMesh.position.set(-0.36,-1.12,-1.58);
-  brainGroup.add(cbMesh);
+  if(abs>=1000) return n.toLocaleString('en-US',{maximumSignificantDigits:6});
+  return parseFloat(n.toPrecision(6)).toString();
+}
 
-  /* ── BRAINSTEM ── */
-  const bsGeo=new THREE.CylinderGeometry(0.22,0.33,1.4,20);
-  const bsMat=new THREE.MeshStandardMaterial({color:0xC0BDB5,roughness:.88,metalness:.01});
-  const bsMesh=new THREE.Mesh(bsGeo,bsMat);
-  bsMesh.position.set(0.1,-2.48,-0.42);
-  bsMesh.rotation.x=.26;
-  brainGroup.add(bsMesh);
+function fmtPlain(n){
+  if(n===null||isNaN(n)) return '?';
+  if(n===0) return '0';
+  const abs=Math.abs(n);
+  if(abs>=1e9||(abs<1e-5&&abs>0)) return n.toExponential(4);
+  if(abs>=1000) return n.toLocaleString('en-US',{maximumSignificantDigits:6});
+  return parseFloat(n.toPrecision(6)).toString();
+}
 
-  /* ── REGION HOTSPOTS ── */
-  REGIONS.forEach((r,i)=>{
-    const g=new THREE.SphereGeometry(r.r,16,16);
-    const m=new THREE.MeshStandardMaterial({
-      color:r.color,
-      emissive:new THREE.Color(r.color).multiplyScalar(.35),
-      roughness:.5,metalness:.1,
-      transparent:true,opacity:.5
-    });
-    hotMats.push(m);
-    const mesh=new THREE.Mesh(g,m);
-    mesh.position.set(...r.pos);
-    mesh.userData=r;
-    hotMeshes.push(mesh);
-    brainGroup.add(mesh);
-  });
-
-  /* ── NEURAL PARTICLES ── */
-  const pCount=340;
-  const pGeo=new THREE.BufferGeometry();
-  const pArr=new Float32Array(pCount*3);
-  for(let i=0;i<pCount;i++){
-    const th=Math.random()*Math.PI*2;
-    const ph=Math.acos(Math.random()*2-1);
-    const r=3.2+Math.random()*2.2;
-    pArr[i*3]=r*Math.sin(ph)*Math.cos(th);
-    pArr[i*3+1]=r*Math.sin(ph)*Math.sin(th);
-    pArr[i*3+2]=r*Math.cos(ph);
+function findCatForUnit(u){
+  for(const [k,cat] of Object.entries(CATS)){
+    if(Object.keys(cat.units).includes(u)) return k;
   }
-  pGeo.setAttribute('position',new THREE.BufferAttribute(pArr,3));
-  const pMat=new THREE.PointsMaterial({color:0x2D6132,size:.032,transparent:true,opacity:.55});
-  const particles=new THREE.Points(pGeo,pMat);
-  scene.add(particles);
-
-  /* ── LIGHTS ── */
-  // Key light: cool white from upper left
-  const key=new THREE.DirectionalLight(0xE8ECE8,2.2);
-  key.position.set(-3,3,4);
-  scene.add(key);
-  // Fill: warm from right
-  const fill=new THREE.DirectionalLight(0xC8D4C8,0.7);
-  fill.position.set(4,0,1);
-  scene.add(fill);
-  // Rim: green from behind for WKW nod
-  const rim=new THREE.PointLight(0x1A5C20,2.5,14);
-  rim.position.set(0,-1,-6);
-  scene.add(rim);
-  // Ambient
-  const amb=new THREE.AmbientLight(0x181C18,1.8);
-  scene.add(amb);
-  // Top light
-  const top=new THREE.PointLight(0xD0D8D0,1.2,12);
-  top.position.set(0,6,0);
-  scene.add(top);
-
-  /* ── HTML LABELS ── */
-  const lw=document.getElementById('labels');
-  REGIONS.forEach(r=>{
-    const el=document.createElement('div');
-    el.className='rlabel';
-    el.dataset.id=r.id;
-    el.textContent=r.name;
-    lw.appendChild(el);
-    labelEls.push({el,r});
-  });
-
-  /* start loop */
-  loop(particles);
+  return null;
 }
 
-/* ── GROUPS & MESHES ── */
-const brainGroup=new THREE.Group();
-scene.add(brainGroup);
-const hotMeshes=[];
-const hotMats=[];
-const labelEls=[];
-
-/* ── ROTATION CONTROL ── */
-let drag=false,prev={x:0,y:0},auto=true;
-const domEl=document.getElementById('canvas');
-domEl.addEventListener('mousedown',e=>{drag=true;auto=false;prev={x:e.clientX,y:e.clientY};});
-domEl.addEventListener('touchstart',e=>{drag=true;auto=false;prev={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
-window.addEventListener('mouseup',()=>{drag=false;setTimeout(()=>auto=true,2500);});
-window.addEventListener('touchend',()=>{drag=false;setTimeout(()=>auto=true,2500);});
-window.addEventListener('mousemove',e=>{
-  if(!drag)return;
-  brainGroup.rotation.y+=(e.clientX-prev.x)*.009;
-  brainGroup.rotation.x+=(e.clientY-prev.y)*.009;
-  prev={x:e.clientX,y:e.clientY};
-});
-window.addEventListener('touchmove',e=>{
-  if(!drag)return;
-  brainGroup.rotation.y+=(e.touches[0].clientX-prev.x)*.009;
-  brainGroup.rotation.x+=(e.touches[0].clientY-prev.y)*.009;
-  prev={x:e.touches[0].clientX,y:e.touches[0].clientY};
-},{passive:true});
-
-/* ── RAYCASTING ── */
-const ray=new THREE.Raycaster();
-const mv=new THREE.Vector2();
-let lmp={x:0,y:0};
-window.addEventListener('mousemove',e=>{lmp={x:e.clientX,y:e.clientY};});
-domEl.addEventListener('click',e=>{
-  mv.x=(e.clientX/window.innerWidth)*2-1;
-  mv.y=-(e.clientY/window.innerHeight)*2+1;
-  ray.setFromCamera(mv,camera);
-  const hits=ray.intersectObjects(hotMeshes);
-  if(hits.length)openPanel(hits[0].object.userData);
-});
-
-function openPanel(r){
-  hotMats.forEach((m,i)=>{m.emissive.set(new THREE.Color(REGIONS[i].color).multiplyScalar(.35));});
-  const idx=REGIONS.findIndex(x=>x.id===r.id);
-  if(idx>=0)hotMats[idx].emissive.set(new THREE.Color(REGIONS[idx].color).multiplyScalar(.9));
-  document.getElementById('ptag').textContent='Brain Region';
-  document.getElementById('pname').textContent=r.name;
-  document.getElementById('psub').textContent=r.sub;
-  document.getElementById('ptext').textContent=r.text;
-  const c=document.getElementById('pconn');
-  c.textContent=r.conn;c.style.display='block';
-  document.getElementById('panel').classList.add('open');
-}
-function closePanel(){
-  document.getElementById('panel').classList.remove('open');
-  hotMats.forEach((m,i)=>{m.emissive.set(new THREE.Color(REGIONS[i].color).multiplyScalar(.35));});
-}
-window.closePanel=closePanel;
-
-/* ── UPDATE LABELS ── */
-const tmp3=new THREE.Vector3();
-function updateLabels(){
-  const nW=window.innerWidth,nH=window.innerHeight;
-  labelEls.forEach(({el,r})=>{
-    tmp3.set(...r.pos);
-    brainGroup.localToWorld(tmp3);
-    tmp3.project(camera);
-    el.style.left=(tmp3.x*.5+.5)*nW+'px';
-    el.style.top=(-.5*tmp3.y+.5)*nH-22+'px';
-    // hide if behind
-    el.style.opacity=tmp3.z<1?'.55':'0';
-  });
-}
-
-/* ── HOVER ── */
-function checkHover(){
-  mv.x=(lmp.x/window.innerWidth)*2-1;
-  mv.y=-(lmp.y/window.innerHeight)*2+1;
-  ray.setFromCamera(mv,camera);
-  const hits=ray.intersectObjects(hotMeshes);
-  domEl.style.cursor=hits.length?'pointer':'default';
-  labelEls.forEach(({el})=>el.classList.remove('lit'));
-  if(hits.length){
-    const lel=labelEls.find(x=>x.r.id===hits[0].object.userData.id);
-    if(lel)lel.el.classList.add('lit');
+function normalizeUnit(raw){
+  const trimmed = raw.trim();
+  // Direct match
+  for(const [k,cat] of Object.entries(CATS)){
+    if(Object.keys(cat.units).includes(trimmed)) return trimmed;
   }
+  // Alias lookup — try as-is first, then lowercase
+  if(ALIAS[trimmed]) return ALIAS[trimmed];
+  if(ALIAS[trimmed.toLowerCase()]) return ALIAS[trimmed.toLowerCase()];
+  return null;
 }
 
-/* ── MAIN LOOP ── */
-let t=0;
-function loop(particles){
-  requestAnimationFrame(()=>loop(particles));
-  t+=.007;
-  if(auto&&!drag)brainGroup.rotation.y+=.0025;
-  // Pulsing hotspots
-  hotMeshes.forEach((m,i)=>{
-    hotMats[i].opacity=.42+Math.sin(t+i*1.1)*.1;
-    m.scale.setScalar(.96+Math.sin(t*1.2+i*.8)*.04);
+// ─── CONVERSION LOGIC ─────────────────────────────────────────────────────────
+function convertTemp(val,from,to){
+  let c;
+  if(from==='°C') c=val;
+  else if(from==='°F') c=(val-32)*5/9;
+  else c=val-273.15;
+  if(to==='°C') return c;
+  if(to==='°F') return c*9/5+32;
+  return c+273.15;
+}
+
+function convert(val,fromUnit,toUnit){
+  const cat=findCatForUnit(fromUnit);
+  if(!cat||findCatForUnit(toUnit)!==cat) return null;
+  if(cat==='temp') return convertTemp(val,fromUnit,toUnit);
+  const f=CATS[cat].units[fromUnit];
+  const t=CATS[cat].units[toUnit];
+  return val*f/t;
+}
+
+function allConversions(val,fromUnit){
+  const cat=findCatForUnit(fromUnit);
+  if(!cat) return [];
+  return Object.keys(CATS[cat].units).map(u=>({
+    unit:u,
+    val:cat==='temp'?convertTemp(val,fromUnit,u):val*CATS[cat].units[fromUnit]/CATS[cat].units[u]
+  }));
+}
+
+// ─── CATEGORY CONVERTER UI ────────────────────────────────────────────────────
+let currentCat='volume';
+
+function populateSelects(cat,fromKey,toKey){
+  const units=Object.keys(CATS[cat].units);
+  const fu=document.getElementById('fromUnit');
+  const tu=document.getElementById('toUnit');
+  fu.innerHTML=''; tu.innerHTML='';
+  units.forEach(u=>{
+    fu.innerHTML+=`<option value="${u}">${u}</option>`;
+    tu.innerHTML+=`<option value="${u}">${u}</option>`;
   });
-  if(particles)particles.rotation.y+=.0004;
-  checkHover();
-  updateLabels();
-  renderer.render(scene,camera);
+  fu.value=fromKey||units[Math.min(2,units.length-1)];
+  tu.value=toKey||units[Math.min(3,units.length-1)];
 }
 
-window.addEventListener('resize',()=>{
-  const nW=window.innerWidth,nH=window.innerHeight;
-  camera.aspect=nW/nH;camera.updateProjectionMatrix();
-  renderer.setSize(nW,nH);
-});
+function setcat(cat,btn){
+  currentCat=cat;
+  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const units=Object.keys(CATS[cat].units);
+  populateSelects(cat,units[Math.min(2,units.length-1)],units[Math.min(3,units.length-1)]);
+  document.getElementById('fromVal').value=1;
+  recalc();
+}
+
+function recalc(){
+  const val=parseFloat(document.getElementById('fromVal').value)||0;
+  const fu=document.getElementById('fromUnit').value;
+  const tu=document.getElementById('toUnit').value;
+  const result=convert(val,fu,tu);
+  document.getElementById('toVal').value=result===null?'—':fmtPlain(result);
+  document.getElementById('bigEq').textContent=`${fmtPlain(val)} ${fu} =`;
+  document.getElementById('bigVal').innerHTML=result===null?'—':fmt(result);
+  document.getElementById('bigUnit').textContent=tu;
+
+  // All conversions table
+  const rows=allConversions(val,fu);
+  const el=document.getElementById('allRows');
+  el.innerHTML=rows.map(r=>`
+    <div class="all-row${r.unit===tu?' highlighted':''}">
+      <span class="all-unit">${r.unit}</span>
+      <span class="all-val">${fmt(r.val)}</span>
+    </div>
+  `).join('');
+}
+
+function swapUnits(){
+  const fu=document.getElementById('fromUnit');
+  const tu=document.getElementById('toUnit');
+  const fv=fu.value, tv=tu.value;
+  fu.value=tv; tu.value=fv;
+  recalc();
+}
+
+// Init
+populateSelects('volume','µL','mL');
+recalc();
+
+// ─── CHAT PARSER ──────────────────────────────────────────────────────────────
+const chatIn=document.getElementById('chatIn');
+chatIn.addEventListener('keydown',e=>{if(e.key==='Enter')handleChat();});
+
+function handleChat(){
+  const raw=chatIn.value.trim();
+  if(!raw) return;
+  chatIn.value='';
+  document.getElementById('chatEmpty')?.remove();
+
+  const win=document.getElementById('chatWin');
+  const wrap=document.createElement('div');
+  wrap.className='bubble-wrap';
+
+  // User bubble
+  const bq=document.createElement('div');
+  bq.className='bubble-q';
+  bq.textContent=raw;
+  wrap.appendChild(bq);
+
+  // Parse
+  const ba=document.createElement('div');
+  ba.className='bubble-a';
+  const parsed=parseQuery(raw);
+  if(!parsed){
+    ba.innerHTML=`<div class="bubble-err">Couldn't parse that. Try: <em>5 mmol to mol</em> or <em>100 uL to mL</em></div>`;
+  } else {
+    const {val,fromUnit,toUnit,result,others}=parsed;
+    ba.innerHTML=`
+      <div class="bubble-main">
+        ${fmtPlain(val)}&nbsp;${fromUnit}<span class="eq-sign">=</span><span class="result">${fmt(result)}</span>&nbsp;${toUnit}
+      </div>
+      <div class="bubble-others">
+        ${others.map(o=>`<span class="bub-chip${o.unit===toUnit?' active-chip':''}">${fmt(o.val)} ${o.unit}</span>`).join('')}
+      </div>
+    `;
+  }
+  wrap.appendChild(ba);
+  win.appendChild(wrap);
+  win.scrollTop=win.scrollHeight;
+}
+
+function parseQuery(raw){
+  // Normalize: replace 'to' or 'in' or '->' separator
+  // Pattern: NUMBER UNIT (to|in|->) UNIT
+  const cleaned=raw.replace(/\s+/g,' ').trim();
+  const m=cleaned.match(/^([+-]?[\d.,]+(?:e[+-]?\d+)?)\s*([^\s]+?)\s+(?:to|in|→|->|=)\s+([^\s]+)$/i);
+  if(!m) return null;
+  const val=parseFloat(m[1].replace(',',''));
+  const fromRaw=m[2], toRaw=m[3];
+  const fromUnit=normalizeUnit(fromRaw);
+  const toUnit=normalizeUnit(toRaw);
+  if(!fromUnit||!toUnit) return null;
+  const result=convert(val,fromUnit,toUnit);
+  if(result===null) return null;
+  const others=allConversions(val,fromUnit);
+  return {val,fromUnit,toUnit,result,others};
+}
+
+// ─── FADE IN ─────────────────────────────────────────────────────────────────
+const io=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('in');});},{threshold:.05});
+document.querySelectorAll('.fi').forEach(el=>io.observe(el));
 </script>
 </body>
 </html>
